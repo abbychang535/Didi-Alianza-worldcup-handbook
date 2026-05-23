@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copa del Mundo: Programa de Puntos y Fondo de Bonos Vendor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0B1F3A; --red:#C0272D; --red-l:#FDF0F1;
+  --gold:#B07B10; --gold-l:#FFF8ED;
+  --green:#0A6638; --green-l:#E8F6EE;
+  --blue:#1558A0; --blue-l:#EBF3FC;
+  --gray:#F4F5FA; --border:#DDE2EE;
+  --text:#18202E; --muted:#5A6475;
+  --r:14px; --rs:9px;
+}
+body{font-family:'Inter',sans-serif;background:#E4E7F0;color:var(--text);font-size:14px;line-height:1.65;}
+.page{max-width:980px;margin:0 auto;padding:32px 24px 80px;}
+
+/* HERO */
+.hero{background:var(--navy);border-radius:20px;padding:44px 52px 38px;margin-bottom:20px;position:relative;overflow:hidden;}
+.hero::before{content:'⚽';position:absolute;right:-10px;bottom:-50px;font-size:220px;opacity:0.055;transform:rotate(-12deg);}
+.hero::after{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#C0272D,#B07B10,#0A6638,#1558A0);}
+.hero h1{font-size:28px;font-weight:900;color:#F0C060;line-height:1.25;margin-bottom:10px;}
+.hero-desc{font-size:13px;color:rgba(255,255,255,0.52);margin-bottom:26px;max-width:580px;line-height:1.8;font-weight:300;}
+.hero-stats{display:flex;gap:0;flex-wrap:wrap;}
+.hs{padding:0 20px;border-left:1.5px solid rgba(255,255,255,0.12);}
+.hs:first-child{padding-left:0;border-left:none;}
+.hs-val{font-size:24px;font-weight:700;color:#F0C060;line-height:1.1;}
+.hs-lbl{font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;}
+
+/* PRIZE BANNER */
+.prize-banner{background:linear-gradient(135deg,#7A0B12 0%,#C0272D 50%,#9A1010 100%);border-radius:16px;padding:22px 28px;margin-bottom:20px;display:flex;align-items:center;gap:0;position:relative;overflow:hidden;}
+.prize-banner::before{content:'🏆';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:80px;opacity:0.12;}
+.pb-main{flex:0 0 auto;text-align:center;padding-right:28px;border-right:1.5px solid rgba(255,255,255,0.15);}
+.pb-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+.pb-val{font-size:46px;font-weight:900;color:#F0C060;line-height:1;}
+.pb-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;}
+.pb-breakdown{flex:1;display:flex;gap:0;padding-left:28px;}
+.pb-item{flex:1;text-align:center;padding:0 12px;border-right:1px solid rgba(255,255,255,0.1);}
+.pb-item:last-child{border-right:none;}
+.pb-item-icon{font-size:22px;margin-bottom:5px;}
+.pb-item-val{font-size:20px;font-weight:700;color:#fff;line-height:1;}
+.pb-item-lbl{font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;}
+
+/* DIDI HEADER */
+.didi-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding:14px 24px;background:#fff;border-radius:14px;border:1px solid var(--border);}
+.didi-logo{display:flex;align-items:center;gap:10px;}
+.didi-logo-mark{background:#FF5800;border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+.didi-logo-mark svg{width:26px;height:26px;}
+.didi-logo-wordmark{font-size:20px;font-weight:800;color:#FF5800;letter-spacing:-0.5px;}
+.didi-alianza{font-size:18px;font-weight:700;color:#1a1a1a;}
+.didi-alianza span{color:#FF5800;}
+.didi-header-right{font-size:11px;color:var(--muted);text-align:right;line-height:1.6;}
+
+/* SECTION */
+.sec{margin:28px 0 0;}
+.sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid var(--border);}
+.sec-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:700;flex-shrink:0;}
+.sec-hd h2{font-size:18px;font-weight:700;color:var(--navy);}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px;}
+.card-t{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* PERSPECTIVE */
+.persp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.persp{border-radius:var(--r);padding:22px;}
+.persp.vendor{background:linear-gradient(140deg,#0B1F3A 0%,#162E50 100%);}
+.persp.rider{background:linear-gradient(140deg,#083020 0%,#0D5030 100%);}
+.persp-top{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.persp-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.persp.vendor .persp-avatar{background:rgba(240,192,96,0.15);border:1.5px solid rgba(240,192,96,0.25);}
+.persp.rider .persp-avatar{background:rgba(112,221,160,0.15);border:1.5px solid rgba(112,221,160,0.25);}
+.persp-title{font-size:17px;font-weight:700;}
+.persp.vendor .persp-title{color:#F0C060;}
+.persp.rider .persp-title{color:#70DDA0;}
+.persp-label{font-size:10px;opacity:0.45;color:#fff;margin-top:2px;}
+.persp-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.75;margin-bottom:14px;}
+.persp-earn-box{border-radius:var(--rs);padding:12px 14px;}
+.persp.vendor .persp-earn-box{background:rgba(240,192,96,0.12);border:1px solid rgba(240,192,96,0.2);}
+.persp.rider .persp-earn-box{background:rgba(112,221,160,0.1);border:1px solid rgba(112,221,160,0.2);}
+.persp-earn-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;color:#fff;margin-bottom:4px;}
+.persp-earn-val{font-size:18px;font-weight:900;line-height:1;}
+.persp.vendor .persp-earn-val{color:#F0C060;}
+.persp.rider .persp-earn-val{color:#70DDA0;}
+.persp-earn-sub{font-size:10px;margin-top:3px;opacity:0.5;color:#fff;}
+
+/* DAY TYPES */
+.day-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.dt-card{border-radius:var(--rs);padding:16px 18px;border:1.5px solid;}
+.dt-normal{background:#EBF3FC;border-color:#85B7EB;}
+.dt-pk{background:#FFF0F0;border-color:#F5BBBE;}
+.dt-icon{font-size:20px;margin-bottom:7px;}
+.dt-title{font-size:13px;font-weight:700;margin-bottom:5px;}
+.dt-normal .dt-title{color:var(--blue);}
+.dt-pk .dt-title{color:var(--red);}
+.dt-body{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* POINTS 6-COL TABLE */
+.pts6-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
+.pts6-tbl col.c-cat{width:76px;}
+.pts6-tbl col.c-act{width:auto;}
+.pts6-tbl col.c-wd{width:78px;}
+.pts6-tbl col.c-we{width:78px;}
+.pts6-tbl col.c-md{width:82px;}
+.pts6-tbl col.c-note{width:185px;}
+.pts6-tbl thead tr{background:var(--red);}
+.pts6-tbl th{color:#fff;font-size:10px;font-weight:700;letter-spacing:0.04em;padding:10px 6px;text-align:center;}
+.pts6-tbl th.th-act{text-align:left;padding-left:12px;}
+.pts6-tbl th.th-note{text-align:left;padding-left:10px;}
+.pts6-tbl th.th-wd{background:#1558A0;}
+.pts6-tbl th.th-we{background:#0A6638;}
+.pts6-tbl th.th-md{background:#A86F10;}
+.pts6-tbl tbody tr{border-bottom:1px solid var(--border);}
+.pts6-tbl tbody tr:last-child{border-bottom:none;}
+.pts6-tbl tbody td{padding:11px 6px;font-size:12px;vertical-align:middle;text-align:center;}
+.pts6-tbl tbody td.td-cat{border-right:2px solid var(--border);padding:10px 4px;}
+.pts6-tbl tbody td.td-act{text-align:left;padding-left:12px;}
+.pts6-tbl tbody td.td-note{text-align:left;padding-left:10px;font-size:11px;color:var(--muted);line-height:1.5;}
+.pts6-tbl tbody td.td-note strong{color:var(--text);}
+.cat-pill{display:inline-block;font-size:9px;font-weight:700;padding:3px 6px;border-radius:20px;white-space:nowrap;}
+.cp-attend{background:#EBF3FC;color:#1558A0;border:1px solid #B8D5F5;}
+.cp-order{background:#E8F6EE;color:#0A6638;border:1px solid #97D4A8;}
+.cp-deduct{background:#FDF0F1;color:#C0272D;border:1px solid #F5BBBE;}
+.act-main{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.act-sub{font-size:10px;color:#8A94A8;margin-top:2px;line-height:1.4;}
+.v-pos{font-size:15px;font-weight:700;color:#0A6638;}
+.v-neg{font-size:15px;font-weight:700;color:#C0272D;}
+.v-nil{font-size:17px;color:#C8D0DE;font-weight:300;}
+.v-zero{font-size:12px;color:#8A94A8;}
+.row-hl-g td{background:#F0FBF4;}
+.row-hl-r td{background:#FEF4F4;}
+.row-hl-g td.td-cat,.row-hl-r td.td-cat{background:inherit;}
+
+/* PK RULES */
+.pk-main{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px;}
+.rule-block{background:var(--gray);border-radius:var(--rs);padding:11px 13px;margin-bottom:8px;font-size:12px;}
+.rule-block.win-block{background:#FEF3EA;border:1px solid #FAC775;}
+.rule-block.lose-block{background:var(--blue-l);border:1px solid #85B7EB;}
+.rule-block.warn-block{background:#FFF0F0;border:1.5px solid var(--red);}
+.rule-block-title{font-size:11px;font-weight:700;margin-bottom:4px;}
+.win-block .rule-block-title{color:var(--gold);}
+.lose-block .rule-block-title{color:var(--blue);}
+.warn-block .rule-block-title{color:var(--red);}
+.rule-block p{font-size:11px;color:var(--muted);line-height:1.65;}
+.prize-rows{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.prize-row{display:flex;align-items:center;gap:8px;}
+.prize-medal{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.prize-rank{font-size:11px;font-weight:500;width:56px;flex-shrink:0;}
+.prize-bar-w{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prize-bar{height:7px;border-radius:4px;}
+.prize-pct{font-size:13px;font-weight:700;color:var(--gold);width:34px;text-align:right;flex-shrink:0;}
+
+/* PK EXAMPLE */
+.ex-outer{background:#F7F9FF;border:1.5px solid #C8D5EE;border-radius:var(--r);padding:12px;}
+.ex-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--blue);margin-bottom:9px;}
+.teams-wrap{display:grid;grid-template-columns:1fr 28px 1fr;gap:0;margin-bottom:8px;}
+.team-box{border-radius:var(--rs);padding:9px 11px;}
+.team-a{background:#EBF3FC;border:1px solid #85B7EB;}
+.team-b{background:var(--red-l);border:1px solid #F5BBBE;}
+.team-vs-col{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--navy);}
+.team-name{font-size:10px;font-weight:700;margin-bottom:6px;}
+.team-a .team-name{color:var(--blue);}
+.team-b .team-name{color:var(--red);}
+.rider-row{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.06);}
+.rider-row:last-child{border:none;font-weight:700;padding-top:5px;}
+.team-a .rider-row:last-child{color:var(--blue);}
+.team-b .rider-row:last-child{color:var(--red);}
+.ex-pool-note{background:#F0FFF8;border:1px solid #97D4A8;border-radius:var(--rs);padding:7px 10px;margin-bottom:8px;font-size:10px;text-align:center;font-weight:500;color:var(--green);}
+.alloc-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:7px;}
+.alloc-table th{font-size:9px;font-weight:700;color:var(--muted);padding:3px 4px;text-align:right;border-bottom:1px solid var(--border);}
+.alloc-table th:first-child{text-align:left;}
+.alloc-table td{padding:3px 4px;text-align:right;border-bottom:1px solid var(--border);}
+.alloc-table td:first-child{text-align:left;}
+.alloc-table tr:last-child td{border-bottom:none;}
+.alloc-total{font-weight:700;color:var(--blue);}
+.loser-note{background:var(--gray);border-radius:var(--rs);padding:7px 10px;font-size:10px;}
+.loser-note-title{font-weight:700;color:var(--muted);margin-bottom:4px;font-size:9px;text-transform:uppercase;letter-spacing:0.07em;}
+.loser-pts-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;color:var(--muted);}
+
+/* SCHEDULE TABLE */
+.sched-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
+.sched-tbl thead tr{background:#1A3457;}
+.sched-tbl th{color:#fff;font-size:10px;font-weight:600;padding:9px 8px;text-align:left;}
+.sched-tbl th:first-child{border-radius:8px 0 0 0;width:46px;text-align:center;white-space:nowrap;}
+.sched-tbl th:last-child{border-radius:0 8px 0 0;}
+.sched-tbl td{padding:9px 8px;border-bottom:1px solid var(--border);font-size:11px;}
+.sched-tbl td:first-child{text-align:center;font-weight:700;color:var(--muted);font-size:11px;}
+.sched-tbl tr.wk td{background:#EBF3FC;}
+.sched-tbl tr.mt td{background:#FFF8ED;}
+.sched-tbl tr.both td{background:#FFF0F0;}
+.type-tag{display:inline-block;font-size:9px;font-weight:700;padding:3px 7px;border-radius:20px;white-space:nowrap;}
+.tt-wk{background:#C6DDF7;color:#0B3A7A;}
+.tt-mt{background:#FAE0A0;color:#6B4A00;}
+.tt-both{background:#F5BBBE;color:#7A0B12;}
+.sched-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted);}
+.sl-item{display:flex;align-items:center;gap:5px;}
+.sl-dot{width:10px;height:10px;border-radius:3px;}
+.remark{font-size:10px;color:var(--muted);}
+
+/* REDEMPTION */
+.rdm-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+.rdm{border-radius:var(--rs);padding:14px 10px;text-align:center;border:1.5px solid;}
+.rdm1{background:#EBF3FC;border-color:#85B7EB;}
+.rdm2{background:var(--gold-l);border-color:#FAC775;}
+.rdm3{background:var(--green-l);border-color:#97D4A8;}
+.rdm4{background:#FDF0F1;border-color:var(--red);}
+.rdm-range{font-size:9px;font-weight:700;margin-bottom:4px;}
+.rdm1 .rdm-range{color:var(--blue);}
+.rdm2 .rdm-range{color:var(--gold);}
+.rdm3 .rdm-range{color:var(--green);}
+.rdm4 .rdm-range{color:var(--red);}
+.rdm-rate{font-size:16px;font-weight:900;color:var(--text);}
+.rdm-sub{font-size:9px;color:var(--muted);margin-top:3px;}
+
+/* VENDOR BUDGET */
+.budget-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.bud-card{border-radius:var(--r);text-align:center;padding:14px 6px;position:relative;overflow:hidden;border:1.5px solid;}
+.bud-card::before{position:absolute;right:-6px;top:-6px;font-size:40px;opacity:0.1;}
+.bw1{background:#EBF3FC;border-color:#85B7EB;} .bw1::before{content:'⚽';}
+.bw2{background:#E8F6EE;border-color:#97D4A8;} .bw2::before{content:'🏅';}
+.bw3{background:var(--gold-l);border-color:#FAC775;} .bw3::before{content:'🏆';}
+.bw4{background:#FDEAE8;border-color:#F5A8A0;} .bw4::before{content:'🔥';}
+.bw5{background:#FDF0F1;border-color:var(--red);} .bw5::before{content:'🎯';}
+.bud-week{font-size:10px;font-weight:700;margin-bottom:3px;}
+.bw1 .bud-week{color:var(--blue);}
+.bw2 .bud-week{color:var(--green);}
+.bw3 .bud-week{color:var(--gold);}
+.bw4 .bud-week{color:var(--red);}
+.bw5 .bud-week{color:#9A0010;}
+.bud-val{font-size:22px;font-weight:900;line-height:1.1;}
+.bw1 .bud-val{color:var(--blue);}
+.bw2 .bud-val{color:var(--green);}
+.bw3 .bud-val{color:var(--gold);}
+.bw4 .bud-val{color:var(--red);}
+.bw5 .bud-val{color:#9A0010;}
+.bud-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+.bud-arrow{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* VENDOR POOL CALC */
+.pool-formula{background:var(--gray);border-radius:var(--rs);padding:12px 16px;margin-bottom:12px;text-align:center;font-size:12px;}
+.pool-formula .highlight{font-weight:700;color:var(--gold);}
+.scores-hd{display:grid;grid-template-columns:1fr 95px 50px 80px 85px;gap:8px;padding:8px 12px;background:#1A3457;border-radius:8px 8px 0 0;}
+.scores-hd span{font-size:10px;font-weight:500;color:rgba(255,255,255,0.8);}
+.scores-row{display:grid;grid-template-columns:1fr 95px 50px 80px 85px;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border);align-items:center;}
+.scores-row:last-child{border-bottom:none;}
+.scores-row:nth-child(odd){background:var(--gray);}
+.sv-name{font-size:11px;color:var(--text);}
+.sv-pts{font-size:11px;color:var(--muted);text-align:right;}
+.sv-pct{font-size:11px;color:var(--muted);text-align:right;}
+.sv-bar-w{height:8px;border-radius:4px;background:var(--border);}
+.sv-amount{font-size:12px;font-weight:700;text-align:right;}
+
+/* BENEFIT GRID */
+.benefit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.benefit-card{background:var(--gray);border-radius:var(--rs);padding:13px 14px;border-left:3px solid var(--gold);}
+.benefit-card h4{font-size:12px;font-weight:700;margin-bottom:4px;}
+.benefit-card p{font-size:11px;color:var(--muted);line-height:1.6;}
+
+/* NOTES */
+.note{border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:12px;line-height:1.75;border-left:3px solid;margin-top:10px;}
+.nb{background:var(--blue-l);border-color:var(--blue);color:#0A3070;}
+.ng{background:var(--green-l);border-color:var(--green);color:#054828;}
+.na{background:var(--gold-l);border-color:var(--gold);color:#6B4A00;}
+.nr{background:var(--red-l);border-color:var(--red);color:#7A0B12;}
+
+/* FLOW */
+.flow{display:flex;align-items:center;flex-wrap:nowrap;overflow-x:auto;margin:10px 0;gap:0;}
+.fn{background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:8px 11px;font-size:11px;font-weight:500;white-space:nowrap;flex-shrink:0;text-align:center;}
+.fn.dark{background:var(--navy);color:#fff;border-color:var(--navy);}
+.fn.green{background:var(--green-l);border-color:#97D4A8;color:var(--green);}
+.fn.gold{background:var(--gold-l);border-color:#FAC775;color:var(--gold);}
+.fa{color:var(--muted);padding:0 4px;font-size:13px;flex-shrink:0;}
+
+/* FAQ */
+.faq{background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:13px 16px;margin-bottom:10px;}
+.faq-q{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+.faq-a{font-size:12px;color:var(--muted);line-height:1.75;}
+.faq-a strong{color:var(--text);}
+
+.divider{height:1px;background:var(--border);margin:28px 0;}
+.footer{text-align:center;font-size:12px;color:var(--muted);padding-top:18px;border-top:1px solid var(--border);margin-top:48px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- DIDI HEADER -->
+<div class="didi-header">
+  <div class="didi-logo">
+    <div class="didi-logo-mark">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 6C8 6 6 8 6 16C6 24 8 26 8 26H14C18 26 22 23 22 16C22 9 18 6 14 6H8Z" fill="white"/>
+        <path d="M10 10H14C16.5 10 18 12 18 16C18 20 16.5 22 14 22H10V10Z" fill="#FF5800"/>
+      </svg>
+    </div>
+    <div class="didi-logo-wordmark">DiDi</div>
+    <div style="width:1.5px;height:28px;background:#e0e0e0;margin:0 10px;"></div>
+    <div class="didi-alianza">DiDi <span>Alianza</span></div>
+  </div>
+  <div class="didi-header-right">
+    Manual de Actividad para Vendor · FIFA World Cup 2026<br>
+    Período de actividad: 1 de junio – 5 de julio de 2026
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>⚽ Copa del Mundo: Programa de Puntos para Repartidores<br>y Fondo de Bonos Vendor</h1>
+  <p class="hero-desc">Durante el Mundial, tres mecánicas se activan al mismo tiempo: Puntos de Repartidor, Batalla PK y Fondo de Bonos Vendor. Cuanto más entreguen tus repartidores y más ganen en las batallas, mayor será tu ganancia del fondo. Actividad: 1 de junio – 5 de julio de 2026, 5 semanas.</p>
+  <div class="hero-stats">
+    <div class="hs"><div class="hs-val">10M</div><div class="hs-lbl">pesos MXN en premios</div></div>
+    <div class="hs"><div class="hs-val">5 sem.</div><div class="hs-lbl">Período 1 jun – 5 jul</div></div>
+    <div class="hs"><div class="hs-val">18</div><div class="hs-lbl">Batallas PK</div></div>
+    <div class="hs"><div class="hs-val">Creciente</div><div class="hs-lbl">600K→700K→800K→900K→1M/sem.</div></div>
+  </div>
+</div>
+
+<!-- PRIZE BANNER -->
+<div class="prize-banner">
+  <div class="pb-main">
+    <div class="pb-label">🏆 Premio Total Copa del Mundo</div>
+    <div class="pb-val">$10M</div>
+    <div class="pb-sub">pesos MXN · 100% destinado a Vendors y Repartidores</div>
+  </div>
+  <div class="pb-breakdown">
+    <div class="pb-item">
+      <div class="pb-item-icon">🏢</div>
+      <div class="pb-item-val">$4M</div>
+      <div class="pb-item-lbl">Fondo de Bonos Vendor</div>
+    </div>
+    <div class="pb-item">
+      <div class="pb-item-icon">🛵</div>
+      <div class="pb-item-val">$6M</div>
+      <div class="pb-item-lbl">Canje de Puntos Repartidor</div>
+    </div>
+    <div class="pb-item">
+      <div class="pb-item-icon">📅</div>
+      <div class="pb-item-val">35 días</div>
+      <div class="pb-item-lbl">5 semanas continuas</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge">1</div><h2>Resumen de la Actividad</h2></div>
+
+  <div class="persp-grid">
+    <div class="persp vendor">
+      <div class="persp-top">
+        <div class="persp-avatar">🏢</div>
+        <div><div class="persp-title">Perspectiva Vendor</div><div class="persp-label">Proveedor</div></div>
+      </div>
+      <p class="persp-desc">La suma total de puntos de tus repartidores determina cuánto recibes del fondo semanal. Mientras más activos estén y más batallas PK ganen, mayor será tu bono.</p>
+      <div class="persp-earn-box">
+        <div class="persp-earn-lbl">Bono semanal disponible</div>
+        <div class="persp-earn-val">$600K → $1M</div>
+        <div class="persp-earn-sub">pesos MXN · creciente, $4M en 5 semanas</div>
+      </div>
+    </div>
+    <div class="persp rider">
+      <div class="persp-top">
+        <div class="persp-avatar">🛵</div>
+        <div><div class="persp-title">Perspectiva Repartidor</div><div class="persp-label">Mensajero</div></div>
+      </div>
+      <p class="persp-desc">Cada día de entregas acumula puntos. En fines de semana y días de partido participan en Batallas PK para ganar puntos extra, canjeables por efectivo al final.</p>
+      <div class="persp-earn-box">
+        <div class="persp-earn-lbl">Canje de puntos</div>
+        <div class="persp-earn-val">Hasta $1 MXN/punto</div>
+        <div class="persp-earn-sub">Más puntos = mejor tasa de canje</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-t">📅 Dos tipos de días durante la actividad — el repartidor gana todos los días</div>
+    <div class="day-grid">
+      <div class="dt-card dt-normal">
+        <div class="dt-icon">📦</div>
+        <div class="dt-title">Días hábiles (entre semana, sin partido)</div>
+        <div class="dt-body">
+          El repartidor hace entregas normales y acumula <strong>puntos personales</strong>.<br>
+          Esos puntos también cuentan en el marcador semanal del Vendor, afectando la distribución del fondo.
+        </div>
+      </div>
+      <div class="dt-card dt-pk">
+        <div class="dt-icon">⚽</div>
+        <div class="dt-title">Fin de semana + Días de partido del Mundial (18 días)</div>
+        <div class="dt-body">
+          <strong>Puntos normales conservados</strong> + Participación en Batalla PK 5v5.<br>
+          El equipo ganador obtiene los puntos del día de ambos equipos. El Vendor del equipo ganador mejora significativamente.
+        </div>
+      </div>
+    </div>
+    <div class="note nb"><strong>Motivación clave del Vendor:</strong> Impulsa a tus repartidores a asistir y ganar las Batallas PK → más puntos → mayor puntaje semanal → mayor participación en los $4M del fondo. ¡Los intereses del Vendor y del repartidor están totalmente alineados!</div>
+  </div>
+</div>
+
+<!-- SECTION 2: POINTS RULES -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge">2</div><h2>Reglas de Puntos para Repartidores</h2></div>
+  <div class="card" style="background:linear-gradient(135deg,#054828,#0A6638);border:none;padding:15px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;">
+    <div style="font-size:26px;flex-shrink:0;">🔒</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#70DDA0;margin-bottom:4px;">Los puntos siempre pertenecen al repartidor</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);line-height:1.65;">Sin importar si el repartidor cambia de Vendor, todos los puntos acumulados <strong style="color:#fff;">siempre siguen al repartidor</strong> y no se pierden ni se descuentan. Los puntos son canjeados únicamente por el propio repartidor.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-t">⚡ Reglas de Puntos (aplica a todos los días: entre semana, fin de semana, día de partido y cálculo del Fondo de Bonos Vendor)</div>
+    <table class="pts6-tbl">
+      <colgroup>
+        <col class="c-cat"><col class="c-act">
+        <col class="c-wd"><col class="c-we"><col class="c-md"><col class="c-note">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Tipo</th><th class="th-act">Acción</th>
+          <th class="th-wd">Entre sem.</th><th class="th-we">Fin de sem.</th><th class="th-md">Día partido</th>
+          <th class="th-note">Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-cat" rowspan="2"><span class="cat-pill cp-attend">Asistencia</span></td>
+          <td class="td-act"><div class="act-main">Puntos por estar en línea (Slot23)</div><div class="act-sub">(+X / hora) Se cuenta cada hora</div></td>
+          <td><span class="v-pos">+1</span></td><td><span class="v-pos">+1</span></td><td><span class="v-pos">+1</span></td>
+          <td class="td-note">Turnos Slot2 y Slot3</td>
+        </tr>
+        <tr class="row-hl-g">
+          <td class="td-act"><div class="act-main"><strong>Bono por asistir 2 días consecutivos (fin de sem.)</strong></div><div class="act-sub">(+X) Sábado y domingo con asistencia completa</div></td>
+          <td><span class="v-nil">—</span></td><td><span class="v-pos">+5</span></td><td><span class="v-nil">—</span></td>
+          <td class="td-note">Requiere cumplir sáb. y dom.</td>
+        </tr>
+        <tr>
+          <td class="td-cat" rowspan="2"><span class="cat-pill cp-order">Entregas</span></td>
+          <td class="td-act"><div class="act-main">Puntos base por entrega perfecta</div><div class="act-sub">(+X / entrega) Llegada al usuario con retraso ≤ 60 seg.</div></td>
+          <td><span class="v-pos">+2</span></td><td><span class="v-pos">+2</span></td><td><span class="v-pos">+2</span></td>
+          <td class="td-note">Por cada entrega perfecta válida</td>
+        </tr>
+        <tr class="row-hl-g">
+          <td class="td-act"><div class="act-main"><strong>Bono extra fin de sem. / día de partido</strong></div><div class="act-sub">(+X / entrega) Se suma al base, total +4 pts/entrega</div></td>
+          <td><span class="v-nil">—</span></td><td><span class="v-pos">+2</span></td><td><span class="v-pos">+2</span></td>
+          <td class="td-note">Fin de sem./partido: <strong>total +4 pts/entrega</strong></td>
+        </tr>
+        <tr>
+          <td class="td-cat" rowspan="3"><span class="cat-pill cp-deduct">Descuentos</span></td>
+          <td class="td-act"><div class="act-main">Reasignación / Cancelación (3R)</div><div class="act-sub">(−X / vez) Reducir 3R evita pérdidas</div></td>
+          <td><span class="v-neg">−5</span></td><td><span class="v-neg">−5</span></td><td><span class="v-neg">−5</span></td>
+          <td class="td-note">Se descuenta cada vez</td>
+        </tr>
+        <tr>
+          <td class="td-act"><div class="act-main">Turno asignado sin completar ningún pedido</div><div class="act-sub">Se activa si tiene turno asignado y 0 entregas</div></td>
+          <td><span class="v-neg">−5</span></td><td><span class="v-neg">−5</span></td><td><span class="v-neg">−5</span></td>
+          <td class="td-note">Se descuenta cada vez</td>
+        </tr>
+        <tr class="row-hl-r">
+          <td class="td-act"><div class="act-main"><strong>Sin actividad por 7 días consecutivos</strong></div><div class="act-sub">Todos los puntos acumulados se reinician</div></td>
+          <td><span class="v-zero">Reinicio</span></td><td><span class="v-zero">Reinicio</span></td><td><span class="v-zero">Reinicio</span></td>
+          <td class="td-note"><strong>¡Aviso!</strong> 7 días sin actividad = puntos a cero</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note ng" style="margin-top:12px;"><strong>Puntos clave:</strong> ① Bono por asistir sáb. y dom. consecutivamente: <strong>+5 pts</strong>; ② Cada entrega perfecta en fin de sem./día partido: <strong>+4 pts</strong> (el doble que entre semana). Estos dos son los factores clave para diferenciarse.</div>
+  </div>
+</div>
+
+<!-- SECTION 3: PK -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge">3</div><h2>Batalla PK 5v5 entre Repartidores</h2></div>
+
+  <!-- 3-① Rules -->
+  <div class="card">
+    <div class="card-t">① Reglas de Victoria y Distribución de Puntos</div>
+    <div class="pk-main">
+      <div class="pk-rules-col">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Cómo se determina el ganador</div>
+        <div class="rule-block">Se suman los puntos del día de los 5 integrantes de cada equipo → <strong>Gana el equipo con mayor puntaje total</strong><br><span style="font-size:10px;color:var(--muted);">Sin enfrentamientos 1v1 individuales, para evitar que accidentes afecten la equidad</span></div>
+        <div class="rule-block win-block">
+          <div class="rule-block-title">🏆 Equipo Ganador</div>
+          <p>① Conserva sus <strong>puntos diarios normales</strong><br>② Obtiene adicionalmente el total de puntos del día del equipo rival, distribuidos por posición (40%/30%/15%/10%/5%)</p>
+        </div>
+        <div class="rule-block lose-block">
+          <div class="rule-block-title">📋 Equipo Perdedor</div>
+          <p>Conserva sus <strong>puntos diarios normales</strong>, sin recibir bonos extra del PK.<br>Participar en la Batalla PK no afecta los puntos base del repartidor.</p>
+        </div>
+        <div class="rule-block warn-block">
+          <div class="rule-block-title">⚠️ Regla especial</div>
+          <p>Un repartidor del equipo ganador con 0 entregas ese día no recibe ningún punto; su parte se pierde. Si se inscribió y no asistió, pierde el derecho a participar en la siguiente batalla (se recupera en la tercera inscripción).</p>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:10px 0 7px;">Distribución de bonos PK para el equipo ganador</div>
+        <div class="prize-rows">
+          <div class="prize-row"><span class="prize-medal">🥇</span><span class="prize-rank">1.er lugar</span><div class="prize-bar-w"><div class="prize-bar" style="width:100%;background:#C8961A;"></div></div><span class="prize-pct">40%</span></div>
+          <div class="prize-row"><span class="prize-medal">🥈</span><span class="prize-rank">2.o lugar</span><div class="prize-bar-w"><div class="prize-bar" style="width:75%;background:#8A9098;"></div></div><span class="prize-pct">30%</span></div>
+          <div class="prize-row"><span class="prize-medal">🥉</span><span class="prize-rank">3.er lugar</span><div class="prize-bar-w"><div class="prize-bar" style="width:38%;background:#A0522D;"></div></div><span class="prize-pct">15%</span></div>
+          <div class="prize-row"><span class="prize-medal" style="opacity:.6;">4️⃣</span><span class="prize-rank">4.o lugar</span><div class="prize-bar-w"><div class="prize-bar" style="width:25%;background:#4A5568;"></div></div><span class="prize-pct">10%</span></div>
+          <div class="prize-row"><span class="prize-medal" style="opacity:.6;">5️⃣</span><span class="prize-rank">5.o lugar</span><div class="prize-bar-w"><div class="prize-bar" style="width:12%;background:#4A5568;"></div></div><span class="prize-pct">5%</span></div>
+        </div>
+      </div>
+      <div class="pk-example-col">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Ejemplo de cálculo</div>
+        <div class="ex-outer">
+          <div class="ex-label">🚩 Ejemplo: Argentina AR vs Brasil BR</div>
+          <div class="teams-wrap">
+            <div class="team-box team-a">
+              <div class="team-name">🇦🇷 Argentina (Ganador)</div>
+              <div class="rider-row"><span>Repartidor 1</span><span>92 pts</span></div>
+              <div class="rider-row"><span>Repartidor 2</span><span>78 pts</span></div>
+              <div class="rider-row"><span>Repartidor 3</span><span>65 pts</span></div>
+              <div class="rider-row"><span>Repartidor 4</span><span>55 pts</span></div>
+              <div class="rider-row"><span>Repartidor 5</span><span>40 pts</span></div>
+              <div class="rider-row"><span>Total equipo</span><span>330 pts</span></div>
+            </div>
+            <div class="team-vs-col">VS</div>
+            <div class="team-box team-b">
+              <div class="team-name">🇧🇷 Brasil (Perdedor)</div>
+              <div class="rider-row"><span>Repartidor 6</span><span>80 pts</span></div>
+              <div class="rider-row"><span>Repartidor 7</span><span>68 pts</span></div>
+              <div class="rider-row"><span>Repartidor 8</span><span>54 pts</span></div>
+              <div class="rider-row"><span>Repartidor 9</span><span>42 pts</span></div>
+              <div class="rider-row"><span>Repartidor 10</span><span>30 pts</span></div>
+              <div class="rider-row"><span>Total equipo</span><span>274 pts</span></div>
+            </div>
+          </div>
+          <div class="ex-pool-note">🏆 Bono PK extra = puntos de Brasil = <strong>274 pts</strong>, todos para Argentina, distribuidos por posición</div>
+          <div style="font-size:9px;font-weight:700;color:var(--blue);margin-bottom:5px;">🇦🇷 Detalle de puntos Argentina (puntos diarios + bono PK)</div>
+          <table class="alloc-table">
+            <thead><tr><th>Repartidor</th><th>Diario</th><th>Bono PK</th><th>Total del día</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 Rep. 1</td><td>92 pts</td><td>274×40%=110 pts</td><td class="alloc-total">202 pts</td></tr>
+              <tr><td>🥈 Rep. 2</td><td>78 pts</td><td>274×30%=82 pts</td><td class="alloc-total">160 pts</td></tr>
+              <tr><td>🥉 Rep. 3</td><td>65 pts</td><td>274×15%=41 pts</td><td class="alloc-total">106 pts</td></tr>
+              <tr><td>4️⃣ Rep. 4</td><td>55 pts</td><td>274×10%=27 pts</td><td class="alloc-total">82 pts</td></tr>
+              <tr><td>5️⃣ Rep. 5</td><td>40 pts</td><td>274×5%=14 pts</td><td class="alloc-total">54 pts</td></tr>
+            </tbody>
+          </table>
+          <div class="loser-note">
+            <div class="loser-note-title">📋 Brasil — puntos diarios conservados</div>
+            <div class="loser-pts-row"><span>Repartidor 6</span><span>80 pts</span></div>
+            <div class="loser-pts-row"><span>Repartidor 7</span><span>68 pts</span></div>
+            <div class="loser-pts-row"><span>Repartidores 8-10</span><span>54/42/30 pts</span></div>
+          </div>
+        </div>
+        <div class="note nb" style="font-size:10px;margin-top:8px;"><strong>Perspectiva Vendor:</strong> El Vendor de Argentina obtiene 604 pts el día PK (10 repartidores completos); el Vendor de Brasil obtiene 0 pts ese día para el fondo, aunque sus repartidores conservan sus puntos personales.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-② Schedule -->
+  <div class="card">
+    <div class="card-t">② Calendario Completo de Batallas PK (18 rondas en total)</div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:7px;">Rondas 1–9</div>
+    <table class="sched-tbl" style="margin-bottom:14px;">
+      <colgroup><col style="width:46px"><col style="width:72px"><col style="width:52px"><col style="width:125px"><col style="width:105px"><col></colgroup>
+      <thead><tr><th style="white-space:nowrap;">Ronda</th><th>Fecha</th><th>Día</th><th>Cierre inscripción</th><th>Tipo</th><th>Motivo</th></tr></thead>
+      <tbody>
+        <tr class="wk"><td>1</td><td>6 jun</td><td>Sáb.</td><td>4 jun (Jue.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="wk"><td>2</td><td>7 jun</td><td>Dom.</td><td>5 jun (Vie.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="mt"><td>3</td><td>11 jun</td><td>Jue.</td><td>9 jun (Mar.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="wk"><td>4</td><td>13 jun</td><td>Sáb.</td><td>11 jun (Jue.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="both"><td>5</td><td>14 jun</td><td>Dom.</td><td>12 jun (Vie.)</td><td><span class="type-tag tt-both">Fin Sem.+Partido</span></td><td class="remark">⚽📅 Fin de sem. × Partido Mundial</td></tr>
+        <tr class="mt"><td>6</td><td>17 jun</td><td>Mié.</td><td>15 jun (Lun.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="mt"><td>7</td><td>18 jun</td><td>Jue.</td><td>16 jun (Mar.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="both"><td>8</td><td>20 jun</td><td>Sáb.</td><td>18 jun (Jue.)</td><td><span class="type-tag tt-both">Fin Sem.+Partido</span></td><td class="remark">⚽📅 Fin de sem. × Partido Mundial</td></tr>
+        <tr class="wk"><td>9</td><td>21 jun</td><td>Dom.</td><td>19 jun (Vie.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:7px;">Rondas 10–18</div>
+    <table class="sched-tbl">
+      <colgroup><col style="width:46px"><col style="width:72px"><col style="width:52px"><col style="width:125px"><col style="width:105px"><col></colgroup>
+      <thead><tr><th style="white-space:nowrap;">Ronda</th><th>Fecha</th><th>Día</th><th>Cierre inscripción</th><th>Tipo</th><th>Motivo</th></tr></thead>
+      <tbody>
+        <tr class="mt"><td>10</td><td>23 jun</td><td>Mar.</td><td>21 jun (Dom.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="mt"><td>11</td><td>24 jun</td><td>Mié.</td><td>22 jun (Lun.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="mt"><td>12</td><td>26 jun</td><td>Vie.</td><td>24 jun (Mié.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="wk"><td>13</td><td>27 jun</td><td>Sáb.</td><td>25 jun (Jue.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="wk"><td>14</td><td>28 jun</td><td>Dom.</td><td>26 jun (Vie.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="mt"><td>15</td><td>29 jun</td><td>Lun.</td><td>27 jun (Sáb.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="mt"><td>16</td><td>30 jun</td><td>Mar.</td><td>28 jun (Dom.)</td><td><span class="type-tag tt-mt">PK Día Partido</span></td><td class="remark">⚽ Día de partido del Mundial</td></tr>
+        <tr class="wk"><td>17</td><td>4 jul</td><td>Sáb.</td><td>2 jul (Jue.)</td><td><span class="type-tag tt-wk">PK Fin de Sem.</span></td><td class="remark">📅 Fin de semana, alta demanda</td></tr>
+        <tr class="both"><td>18</td><td>5 jul</td><td>Dom.</td><td>3 jul (Vie.)</td><td><span class="type-tag tt-both">Fin Sem.+Partido</span></td><td class="remark">⚽📅 Fin de sem. × Partido Mundial</td></tr>
+      </tbody>
+    </table>
+    <div class="sched-legend">
+      <div class="sl-item"><div class="sl-dot" style="background:#C6DDF7;"></div>PK Fin de Semana (10 rondas)</div>
+      <div class="sl-item"><div class="sl-dot" style="background:#FAE0A0;"></div>PK Día de Partido (5 rondas)</div>
+      <div class="sl-item"><div class="sl-dot" style="background:#F5BBBE;"></div>Fin de Sem. + Partido (3 rondas)</div>
+    </div>
+  </div>
+
+  <!-- 3-③ Registration -->
+  <div class="card">
+    <div class="card-t">③ Proceso de Inscripción y Participación</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--gray);border-radius:var(--rs);padding:12px 14px;">
+        <div style="width:26px;height:26px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">1</div>
+        <div><div style="font-size:13px;font-weight:700;">Los repartidores se inscriben contigo</div><div style="font-size:12px;color:var(--muted);">Los repartidores se inscriben voluntariamente para la ronda PK que elijan; tú consolidas las solicitudes y formas el equipo participante</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--gray);border-radius:var(--rs);padding:12px 14px;">
+        <div style="width:26px;height:26px;background:var(--gold);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">2</div>
+        <div><div style="font-size:13px;font-weight:700;">Formas un equipo de 5 y lo nombras</div><div style="font-size:12px;color:var(--muted);">Cada equipo lleva 5 repartidores. <strong>Tú decides el nombre</strong> (ej. "Argentina", "Brasil"). Puedes enviar varios equipos, cada uno compite por separado</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--gray);border-radius:var(--rs);padding:12px 14px;">
+        <div style="width:26px;height:26px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">3</div>
+        <div><div style="font-size:13px;font-weight:700;">Envías la lista al canal oficial de DiDi antes del plazo</div><div style="font-size:12px;color:var(--muted);">Incluye: nombre del equipo + 5 IDs de repartidores. <strong>No enviar a tiempo equivale a retirarse de esa ronda</strong>. El Vendor lo envía de forma centralizada, no el repartidor individualmente</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--gray);border-radius:var(--rs);padding:12px 14px;">
+        <div style="width:26px;height:26px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">4</div>
+        <div><div style="font-size:13px;font-weight:700;">El equipo de DiDi asigna los emparejamientos</div><div style="font-size:12px;color:var(--muted);">El equipo operativo organiza los enfrentamientos de forma equitativa. Los integrantes no pueden cambiarse durante la batalla; si necesitas ajustes, envía una nueva lista antes del cierre de la siguiente ronda</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--green-l);border-radius:var(--rs);padding:12px 14px;border:1px solid #97D4A8;">
+        <div style="width:26px;height:26px;background:var(--green);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">5</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--green);">Resultados disponibles en el sitio web a partir de T+2</div><div style="font-size:12px;color:var(--muted);">A los <strong>2 días hábiles</strong> después de cada batalla, repartidores y Vendors pueden consultar directamente en el <strong>sitio web oficial de DiDi</strong> los resultados y el desglose de puntos de cada repartidor</div></div>
+      </div>
+    </div>
+    <div class="note na"><strong>💡 Consejo de formación:</strong> La composición estratégica del equipo es clave para ganar. Considera el historial de horas en línea y rendimiento de cada repartidor para distribuirlos de forma equilibrada. ¡Más equipos ganando = mayor puntaje del Vendor y mayor participación en el fondo!</div>
+  </div>
+
+  <!-- 3-④ Redemption -->
+  <div class="card">
+    <div class="card-t">④ Reglas de Canje de Puntos del Repartidor</div>
+    <div class="rdm-grid4">
+      <div class="rdm rdm1"><div class="rdm-range">0 – 4,000 pts</div><div class="rdm-rate">$0.50/pto.</div><div class="rdm-sub">Nivel básico</div></div>
+      <div class="rdm rdm2"><div class="rdm-range">4,001 – 6,000 pts</div><div class="rdm-rate">$0.60/pto.</div><div class="rdm-sub">Nivel medio</div></div>
+      <div class="rdm rdm3"><div class="rdm-range">6,001 – 8,000 pts</div><div class="rdm-rate">$0.70/pto.</div><div class="rdm-sub">Nivel alto</div></div>
+      <div class="rdm rdm4"><div class="rdm-range">8,001 pts en adelante</div><div class="rdm-rate">$1.00/pto.</div><div class="rdm-sub">¡Nivel máximo! 🏆</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">Flujo de pago del canje</div>
+    <div class="flow">
+      <div class="fn dark">Repartidor solicita canje</div><div class="fa">→</div>
+      <div class="fn">Operaciones procesa pago</div><div class="fa">→</div>
+      <div class="fn gold">Tú recibes el pago</div><div class="fa">→</div>
+      <div class="fn green">Lo transfieres al repartidor</div><div class="fa">+</div>
+      <div class="fn dark">Notificación por App + SMS</div>
+    </div>
+    <div class="note nb" style="margin-top:10px;"><strong>Puntos históricos (27 abr – 31 may):</strong> El repartidor puede canjearlos por separado ahora o acumularlos con los puntos del Mundial para alcanzar un nivel superior y obtener una mejor tasa (hasta $1.00/punto).</div>
+  </div>
+</div>
+
+<!-- ══════════════════ EARNINGS CALCULATOR ══════════════════ -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge" style="background:var(--green);">💰</div><h2>¿Cuánto puede ganar un repartidor participando?</h2></div>
+  <div class="card" style="overflow:hidden;">
+
+    <div style="background:linear-gradient(135deg,#054828 0%,#0A6638 100%);margin:-20px -22px 20px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.5);margin-bottom:5px;">🎯 Participación completa · Entregas activas · Ganar en PK</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);max-width:460px;line-height:1.65;">Estimación basada en: ~30 entregas perfectas diarias, participar y ganar las 18 batallas PK, más 4,000 pts históricos (abr-may)</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px;">Total canjeable en la actividad</div>
+        <div style="font-size:44px;font-weight:900;color:#70DDA0;line-height:1;">$9,625</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);">pesos MXN</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;">
+      <div style="border-radius:12px;border:1.5px solid #DDE2EE;overflow:hidden;">
+        <div style="background:#EBF3FC;padding:10px 14px;border-bottom:1px solid #DDE2EE;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);margin-bottom:2px;">📅 Puntos diarios</div>
+          <div style="font-size:10px;color:var(--muted);">Ejemplo: 30 entregas perfectas</div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <div style="font-size:11px;color:var(--muted);">🌙 Día hábil</div>
+            <div style="font-size:15px;font-weight:700;color:var(--blue);">+75 pts</div>
+          </div>
+          <div style="padding:4px 0 4px 12px;">
+            <div style="font-size:10px;color:var(--muted);">En línea aprox. 15 pts</div>
+            <div style="font-size:10px;color:var(--muted);">Entregas: 30×2 = 60 pts</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--border);">
+            <div style="font-size:11px;color:var(--muted);">☀️ Fin de sem./partido</div>
+            <div style="font-size:15px;font-weight:700;color:var(--green);">+135 pts</div>
+          </div>
+          <div style="padding:4px 0 4px 12px;">
+            <div style="font-size:10px;color:var(--muted);">En línea aprox. 15 pts</div>
+            <div style="font-size:10px;color:var(--muted);">Entregas: 30×4 = 120 pts</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-radius:12px;border:1.5px solid #DDE2EE;overflow:hidden;">
+        <div style="background:#E8F6EE;padding:10px 14px;border-bottom:1px solid #DDE2EE;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:2px;">📆 Puntos semanales</div>
+          <div style="font-size:10px;color:var(--muted);">4 días hábiles + 2 días fin de sem.</div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);">
+            <span>4 días × 75 pts</span><span style="font-weight:600;color:var(--text);">300 pts</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);">
+            <span>2 días × 135 pts</span><span style="font-weight:600;color:var(--text);">270 pts</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;margin-top:2px;">
+            <span style="font-size:11px;font-weight:700;color:var(--text);">Total semanal</span>
+            <span style="font-size:19px;font-weight:700;color:var(--green);">570 pts</span>
+          </div>
+          <div style="background:var(--green-l);border-radius:8px;padding:7px 8px;text-align:center;margin-top:2px;">
+            <div style="font-size:9px;color:var(--green);margin-bottom:2px;">Equivale aprox. a</div>
+            <div style="font-size:14px;font-weight:700;color:var(--green);">$285–$570 MXN/sem.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-radius:12px;border:1.5px solid #DDE2EE;overflow:hidden;">
+        <div style="background:#FFF8ED;padding:10px 14px;border-bottom:1px solid #DDE2EE;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:2px;">⚽ 5 semanas del Mundial</div>
+          <div style="font-size:10px;color:var(--muted);">Con 18 batallas ganadas</div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);">
+            <span>Puntos diarios 570×5 sem.</span><span style="font-weight:600;color:var(--text);">2,850 pts</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);">
+            <span>🏆 Bono extra por PK ganados</span><span style="font-weight:600;color:var(--text);">1,995 pts</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;margin-top:2px;">
+            <span style="font-size:11px;font-weight:700;color:var(--text);">Total 5 semanas</span>
+            <span style="font-size:19px;font-weight:700;color:var(--gold);">4,845 pts</span>
+          </div>
+          <div style="background:var(--gold-l);border-radius:8px;padding:7px 8px;text-align:center;margin-top:2px;">
+            <div style="font-size:9px;color:var(--gold);margin-bottom:2px;">Equivale aprox. a</div>
+            <div style="font-size:14px;font-weight:700;color:var(--gold);">~$4,845 MXN</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--gray);border-radius:12px;padding:16px 20px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">📊 Resumen total de la actividad (incl. puntos históricos abr-may)</div>
+      <div style="display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;">
+        <div style="text-align:center;padding:0 16px 0 0;border-right:1px solid var(--border);flex-shrink:0;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Histórico abr-may</div>
+          <div style="font-size:20px;font-weight:700;color:var(--blue);">4,000 pts</div>
+        </div>
+        <div style="font-size:18px;color:var(--muted);padding:0 10px;flex-shrink:0;">+</div>
+        <div style="text-align:center;padding:0 16px;border-right:1px solid var(--border);flex-shrink:0;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Puntos diarios Mundial</div>
+          <div style="font-size:20px;font-weight:700;color:var(--green);">2,850 pts</div>
+        </div>
+        <div style="font-size:18px;color:var(--muted);padding:0 10px;flex-shrink:0;">+</div>
+        <div style="text-align:center;padding:0 16px;border-right:1px solid var(--border);flex-shrink:0;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Bono PK ganado</div>
+          <div style="font-size:20px;font-weight:700;color:var(--gold);">1,995 pts</div>
+        </div>
+        <div style="font-size:18px;color:var(--muted);padding:0 10px;flex-shrink:0;">=</div>
+        <div style="text-align:center;padding:0 16px;border-right:1px solid var(--border);flex-shrink:0;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Total acumulado</div>
+          <div style="font-size:20px;font-weight:700;color:var(--red);">9,625 pts</div>
+          <div style="font-size:9px;color:var(--muted);">+8,000 → nivel máximo</div>
+        </div>
+        <div style="font-size:18px;color:var(--muted);padding:0 10px;flex-shrink:0;">×</div>
+        <div style="flex:1;background:linear-gradient(135deg,#054828,#0A6638);border-radius:10px;padding:12px 14px;text-align:center;min-width:130px;">
+          <div style="font-size:9px;color:rgba(255,255,255,0.6);margin-bottom:3px;">$1 MXN/punto (nivel máximo)</div>
+          <div style="font-size:30px;font-weight:900;color:#70DDA0;line-height:1;">$9,625</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">MXN · ganancia total</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note ng" style="margin-top:12px;"><strong>💡 ¡Más puntos = mejor tasa de canje!</strong> Cuando el total supera los 8,000 puntos, la tasa sube a <strong>$1 MXN/punto</strong> (nivel máximo). Asistir activamente + ganar en PK es la forma más rápida de alcanzarlo. ¡Incentiva a tus repartidores a participar!</div>
+  </div>
+</div>
+
+<!-- SECTION 4: VENDOR POOL -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge">4</div><h2>Fondo de Bonos Vendor</h2></div>
+
+  <div class="card">
+    <div class="card-t">① Presupuesto Semanal Creciente (total $4M MXN en 5 semanas)</div>
+    <div class="budget-row">
+      <div class="bud-card bw1"><div class="bud-week">⚽ Semana 1</div><div class="bud-val">$600K</div><div class="bud-sub">1 jun – 7 jun</div><div class="bud-arrow">↑ Inicio</div></div>
+      <div class="bud-card bw2"><div class="bud-week">🏅 Semana 2</div><div class="bud-val">$700K</div><div class="bud-sub">8 jun – 14 jun</div><div class="bud-arrow">↑ +100K</div></div>
+      <div class="bud-card bw3"><div class="bud-week">🏆 Semana 3</div><div class="bud-val">$800K</div><div class="bud-sub">15 jun – 21 jun</div><div class="bud-arrow">↑ +100K</div></div>
+      <div class="bud-card bw4"><div class="bud-week">🔥 Semana 4</div><div class="bud-val">$900K</div><div class="bud-sub">22 jun – 28 jun</div><div class="bud-arrow">↑ +100K</div></div>
+      <div class="bud-card bw5"><div class="bud-week">🎯 Semana 5</div><div class="bud-val">$1M</div><div class="bud-sub">29 jun – 5 jul</div><div class="bud-arrow">↑ Máximo</div></div>
+    </div>
+    <div class="note ng" style="margin-top:4px;"><strong>¡El fondo crece cada semana!</strong> La semana 5 (29 jun – 5 jul) es la etapa más emocionante del torneo, con un fondo de $1M MXN. ¡Mantén a tus repartidores activos hasta el final para maximizar tus ganancias!</div>
+  </div>
+
+  <div class="card">
+    <div class="card-t">② Cómo Se Calcula el Fondo de Bonos</div>
+    <div class="pool-formula">
+      Tu bono semanal = <span class="highlight">(Puntos contabilizados de tus repartidores esta semana ÷ Total de puntos de todos los Vendors) × Monto del fondo semanal</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:var(--gray);border-radius:var(--rs);padding:10px 12px;font-size:11px;display:flex;align-items:flex-start;gap:8px;">
+        <span style="font-size:16px;flex-shrink:0;">📦</span><span><strong>Días hábiles normales:</strong> Todos los puntos diarios de tus repartidores se contabilizan por completo</span>
+      </div>
+      <div style="background:#FFF0F0;border-radius:var(--rs);padding:10px 12px;font-size:11px;display:flex;align-items:flex-start;gap:8px;border:1px solid #F5BBBE;">
+        <span style="font-size:16px;flex-shrink:0;">⚽</span><span><strong>Día de Batalla PK:</strong> Solo los puntos del equipo ganador cuentan para el Vendor (10 repartidores en total); el Vendor del equipo perdedor obtiene 0 puntos ese día</span>
+      </div>
+    </div>
+    <div style="background:#F7F9FF;border:1.5px solid #C0CDE8;border-radius:var(--r);padding:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:10px;">📌 Ejemplo de cálculo (3 Vendors esta semana, fondo = $800K)</div>
+      <div class="scores-hd">
+        <span>Vendor</span><span style="text-align:right;">Pts. contabilizados</span><span style="text-align:right;">Parte</span><span style="text-align:right;padding-right:4px;">Distribución</span><span style="text-align:right;">Bono obtenido</span>
+      </div>
+      <div class="scores-row" style="background:#EBF3FC;">
+        <span class="sv-name">Vendor A (50 reps., gana muchos PK)</span>
+        <span class="sv-pts">5,800 pts</span><span class="sv-pct">50%</span>
+        <div style="display:flex;align-items:center;"><div class="sv-bar-w" style="width:78px;"><div style="height:8px;border-radius:4px;background:var(--blue);width:100%;"></div></div></div>
+        <span class="sv-amount" style="color:var(--blue);">$400K</span>
+      </div>
+      <div class="scores-row" style="background:var(--green-l);">
+        <span class="sv-name">Vendor B (30 reps., pocos PK ganados)</span>
+        <span class="sv-pts">3,480 pts</span><span class="sv-pct">30%</span>
+        <div style="display:flex;align-items:center;"><div class="sv-bar-w" style="width:78px;"><div style="height:8px;border-radius:4px;background:var(--green);width:60%;"></div></div></div>
+        <span class="sv-amount" style="color:var(--green);">$240K</span>
+      </div>
+      <div class="scores-row" style="background:var(--gold-l);">
+        <span class="sv-name">Vendor C (20 reps., sin participar en PK)</span>
+        <span class="sv-pts">2,320 pts</span><span class="sv-pct">20%</span>
+        <div style="display:flex;align-items:center;"><div class="sv-bar-w" style="width:78px;"><div style="height:8px;border-radius:4px;background:var(--gold);width:40%;"></div></div></div>
+        <span class="sv-amount" style="color:var(--gold);">$160K</span>
+      </div>
+    </div>
+    <div class="note nb" style="margin-top:10px;"><strong>Liquidación cada lunes:</strong> El equipo operativo clasifica a los Vendors por puntaje de la semana anterior, calcula la participación de cada uno y distribuye los bonos. Confirma los tiempos de pago exactos con tu VM.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-t">③ Beneficios de Participar en el Fondo de Bonos</div>
+    <div class="benefit-grid">
+      <div class="benefit-card"><h4>💰 Ingresos estables, sin costos extra</h4><p>Tus repartidores hacen entregas normales y tu puntaje acumulado sigue creciendo. Sin inversión adicional: más repartidores activos = mayor bono para ti.</p></div>
+      <div class="benefit-card"><h4>📈 Ganar en PK aumenta significativamente tus ganancias</h4><p>Al ganar una Batalla PK, el Vendor obtiene los puntos de los 10 repartidores, elevando drásticamente el puntaje acumulado. Organizar equipos ganadores es la manera más rápida de aumentar tu participación.</p></div>
+      <div class="benefit-card"><h4>🏆 Los bonos crecen cada semana</h4><p>El fondo sube de $600K a $1M en 5 semanas. Mantén el equipo activo hasta el 5 de julio; las últimas semanas tienen los mayores premios, ¡no te rindas a la mitad!</p></div>
+      <div class="benefit-card"><h4>🤝 Vendor y repartidor ganan juntos</h4><p>Impulsa la asistencia y los PK → más puntos para el repartidor + bono para el Vendor. El esfuerzo de uno beneficia a todos.</p></div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--navy),#1A3457);border-radius:var(--r);padding:18px;margin-top:14px;text-align:center;color:#fff;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:5px;">🏆 Acumulado 5 semanas · Presupuesto total del Fondo de Bonos Vendor</div>
+      <div style="font-size:44px;font-weight:900;color:#F0C060;line-height:1;">$4M MXN</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:5px;">$600K + $700K + $800K + $900K + $1M · tu equipo puede ganarlo todo</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: FAQ -->
+<div class="sec">
+  <div class="sec-hd"><div class="sec-badge">5</div><h2>Preguntas Frecuentes (FAQ)</h2></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Necesito formar grupos de 10 personas para inscribirme?</div><div class="faq-a">R: <strong>No</strong>. Solo envías <strong>1 equipo de 5 repartidores</strong> a la vez; el equipo operativo de DiDi realiza el emparejamiento. Puedes inscribir varios equipos de 5, cada uno compite por separado; los que ganen suman puntos al fondo, a más victorias más ganancias.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Podemos ponerle nombre a nuestro equipo?</div><div class="faq-a">R: <strong>Sí, el nombre lo decides tú</strong>. Recomendamos usar nombres de selecciones de futbol para darle más emoción, como "Argentina" o "Brasil". Incluye el nombre al enviar la lista del equipo.</div></div>
+
+  <div class="faq"><div class="faq-q">P: Si un repartidor pierde la Batalla PK, ¿pierde sus puntos del día?</div><div class="faq-a">R: <strong>No</strong>. Los puntos diarios normales del repartidor (entregas, asistencia) se conservan independientemente del resultado del PK. Perder solo significa <strong>no recibir el bono extra del PK</strong>; los puntos normales siguen en la cuenta personal.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Se puede cambiar a los integrantes del equipo durante la batalla PK?</div><div class="faq-a">R: <strong>No</strong>. Una vez enviada la lista de inscripción, no se pueden cambiar los integrantes durante esa batalla. Para ajustar la alineación, envía una nueva lista antes del <strong>cierre de inscripción de la siguiente ronda</strong>.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Cuándo se pueden consultar los resultados de la Batalla PK?</div><div class="faq-a">R: A los <strong>2 días hábiles</strong> después de cada batalla, repartidores y Vendors pueden consultar directamente en el <strong>sitio web oficial de DiDi</strong> los resultados y el desglose de puntos de cada repartidor.</div></div>
+
+  <div class="faq"><div class="faq-q">P: Si un repartidor no participa en el PK y solo hace entregas normales, ¿sus puntos cuentan para mi fondo de bonos?</div><div class="faq-a">R: <strong>Los días hábiles sí, los días de Batalla PK no</strong>. En días hábiles, todos los puntos diarios del repartidor cuentan en el puntaje acumulado del Vendor. Pero en días de Batalla PK, solo los puntos del equipo ganador (los 10 repartidores) cuentan para el fondo; el Vendor del equipo perdedor no acumula puntos ese día.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Qué pasa si un repartidor no tiene actividad durante 7 días seguidos?</div><div class="faq-a">R: Si el repartidor no tiene registros en línea ni entregas durante 7 días consecutivos, <strong>sus puntos acumulados se reinician a cero</strong>. El reinicio afecta directamente tu puntaje semanal y, por tanto, la distribución del bono. Recuérdales a tus repartidores que deben mantenerse activos.</div></div>
+
+  <div class="faq"><div class="faq-q">P: El fondo se liquida los lunes, ¿cuándo llega exactamente el pago?</div><div class="faq-a">R: Cada lunes, el equipo operativo completa el cálculo de puntajes y la distribución de bonos de la semana anterior. El tiempo exacto de llegada del pago (proceso de factura) depende del ciclo de pago; confírmalo con tu VM. Los canjes de puntos de los repartidores siguen el mismo canal: el pago llega a ti y tú lo transfieres al repartidor.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Qué pasa si se detecta un repartidor registrado de manera fraudulenta?</div><div class="faq-a">R: Por cada repartidor registrado fraudulentamente que se detecte, se descontarán <strong>50 puntos de tu puntaje semanal acumulado</strong>, afectando directamente tu participación en el fondo. Asegúrate de que todos los registros de tus repartidores sean verídicos.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Qué pasa si un equipo no puede ser emparejado por ser número impar?</div><div class="faq-a">R: Si el número de equipos inscritos es impar y no es posible completar el emparejamiento, el equipo que quede sin rival será tratado como <strong>día hábil normal</strong> ese día: el repartidor acumula sus puntos personales con normalidad y los puntos del Vendor se contabilizan en el fondo. Ese equipo tendrá <strong>prioridad en el emparejamiento de la siguiente ronda</strong>.</div></div>
+
+  <div class="faq"><div class="faq-q">P: ¿Cómo se calculan los puntos del fondo si un repartidor cambia de Vendor?</div><div class="faq-a">R: Los puntos personales del repartidor <strong>siempre pertenecen al propio repartidor</strong>; cambiar de Vendor no los afecta. En cuanto al fondo de bonos, la liquidación de cada lunes toma <strong>el padrón del día como referencia</strong>: todos los puntos de esa semana corresponden al Vendor actual; los puntos generados bajo el Vendor anterior no se reatribuyen. Se recomienda gestionar adecuadamente la estabilidad de tu equipo.</div></div>
+
+</div>
+
+<div class="divider"></div>
+<div class="footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="background:#FF5800;border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;">D</div>
+    <span style="font-weight:700;color:#FF5800;">DiDi Alianza</span>
+  </div>
+  <span>Programa Copa del Mundo: Puntos Repartidores y Fondo Vendor · Período: 1 jun – 5 jul 2026</span>
+</div>
+
+</div>
+</body>
+</html>
